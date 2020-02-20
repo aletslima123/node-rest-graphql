@@ -82,7 +82,7 @@ app.post('/users/add', urlEncodedParser, (request, response) => {
   }
 });
 
-app.get('/users/:code', urlEncodedParser, (request, response) => {
+app.get('/users/find/:code', urlEncodedParser, (request, response) => {
   try {
     let code = request.params.code ? Number(request.params.code) : 0;
     console.log('code: ', code);
@@ -93,7 +93,7 @@ app.get('/users/:code', urlEncodedParser, (request, response) => {
 
     getUser(objJSON, (result) => {
       console.log(result);
-      response.send({result});
+      response.send(result);
     });
 
   } catch(error) {
@@ -118,6 +118,8 @@ function getUser(objJSON, callback) {
   try {
     const collection = db.collection('users');
     collection.findOne(objJSON, (error, result) => {
+      console.log('error: ', error);
+      console.log('error: ', result);
       error ? callback(error) : callback(result);
     });
 
