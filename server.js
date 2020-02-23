@@ -86,7 +86,7 @@ app.get('/users/find', urlEncodedParser, (request, response) => {
   try {
     let objJSON = {};
 
-    if(request.query.code) objJSON.code = Number(request.query.code);
+    if(request.query.code) objJSON.code = request.query.code.toString();
     if(request.query.name) objJSON.code = Number(request.query.name);
     if(request.query.age) objJSON.code = Number(request.query.age);
     if(request.query.email) objJSON.code = Number(request.query.email);  
