@@ -82,14 +82,14 @@ app.post('/users/add', urlEncodedParser, (request, response) => {
   }
 });
 
-app.get('/users/find/:code', urlEncodedParser, (request, response) => {
+app.get('/users/find', urlEncodedParser, (request, response) => {
   try {
-    let code = request.params.code ? Number(request.params.code) : 0;
-    console.log('code: ', code);
-    let objJSON = {
-      code: code
-    };
-    console.log('objJSON: ', objJSON);
+    let objJSON = {};
+
+    if(request.query.code) objJSON.code = Number(request.query.code);
+    if(request.query.name) objJSON.code = Number(request.query.name);
+    if(request.query.age) objJSON.code = Number(request.query.age);
+    if(request.query.email) objJSON.code = Number(request.query.email);  
 
     getUser(objJSON, (result) => {
       console.log(result);
@@ -117,12 +117,9 @@ function addUser(objJSON, callback) {
 function getUser(objJSON, callback) {
   try {
     const collection = db.collection('users');
-    collection.findOne(objJSON, (error, result) => {
-      console.log('error: ', error);
-      console.log('error: ', result);
+    collection.find(objJSON).toArray((error, result) => {
       error ? callback(error) : callback(result);
     });
-
   } catch(error) {
     console.log('Error: ', error);
   }
