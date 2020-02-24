@@ -89,10 +89,9 @@ app.get('/users/find', urlEncodedParser, (request, response) => {
     if(request.query.code) objJSON.code = request.query.code.toString();
     if(request.query.name) objJSON.name = request.query.name;
     if(request.query.age) objJSON.age = Number(request.query.age);
-    if(request.query.email) objJSON.email = Number(request.query.email);
+    if(request.query.email) objJSON.email = request.query.email;
 
     getUser(objJSON, (result) => {
-      console.log(result);
       response.send(result);
     });
 
@@ -115,7 +114,6 @@ function addUser(objJSON, callback) {
 }
 
 function getUser(objJSON, callback) {
-  console.log('objJSON: ', objJSON);
   try {
     const collection = db.collection('users');
     collection.find(objJSON).toArray((error, result) => {
