@@ -101,6 +101,26 @@ app.get('/users/find', urlEncodedParser, (request, response) => {
   }
 });
 
+app.put('/users/:code/edit', urlEncodedParser, (request, response) => {
+  try {
+    let code = request.params.code ? request.params.code : 0;
+    let objJSON = {};
+
+    if(request.body.code) objJSON.code = Number(request.body.code);
+    if(request.body.name) objJSON.name = request.body.name;
+    if(request.body.age) objJSON.age = Number(request.body.age);
+    if(request.body.email) objJSON.email = request.body.email;
+
+    editUser(objJSON, code, (result) => {
+      response.send(result);
+    });
+
+  } catch(error) {
+    console.log('Error: ', error);
+    response.send({error: error});
+  }
+});
+
 function addUser(objJSON, callback) {
   try {
     const collection = db.collection('users');
@@ -119,6 +139,18 @@ function getUser(objJSON, callback) {
     collection.find(objJSON).toArray((error, result) => {
       error ? callback(error) : callback(result);
     });
+  } catch(error) {
+    console.log('Error: ', error);
+  }
+}
+
+function editUser(objJSON, code, callback) {
+  try {
+    const collection = db.collection('users');
+    collection.updatetOne({code: code}, {$set: objJSON}, (error, result) => {
+      error ? callback(error) : callback(result);
+    });
+
   } catch(error) {
     console.log('Error: ', error);
   }
