@@ -147,7 +147,7 @@ function getUser(objJSON, callback) {
 function editUser(objJSON, code, callback) {
   try {
     const collection = db.collection('users');
-    collection.updatetOne({code: code}, {$set: objJSON}, (error, result) => {
+    collection.updateOne({code: code}, {$set: objJSON}, (error, result) => {
       error ? callback(error) : callback(result);
     });
 
