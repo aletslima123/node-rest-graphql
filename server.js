@@ -9,18 +9,19 @@ const dbName = 'RestApiDb';
 const door = 3000;
 
 const jsonParser = bodyParser.json();
-const urlEncodedParser = bodyParser.urlencoded({extended: true});
+const urlEncodedParser = bodyParser.urlencoded({ extended: true });
 
 app.use(jsonParser);
 app.use(urlEncodedParser);
 
 mongoClient.connect(
-  url, 
-  {useNewUrlParser: true, useUnifiedTopology: true},
+  url,
+  { useNewUrlParser: true, useUnifiedTopology: true },
   (error, client) => {
     error ? console.log('Erro: ', error) : console.log('Connected!');
     db = client.db(dbName);
-});
+  }
+);
 
 app.listen(door);
 console.log(`Server started in: localhost:${door}`);
@@ -36,30 +37,28 @@ function getCode() {
     const seconds = date.getSeconds();
     const milliseconds = date.getMilliseconds();
     const fullDate = `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
-    const code = Number(parseFloat(fullDate)/2).toFixed(0);
+    const code = Number(parseFloat(fullDate) / 2).toFixed(0);
     return code;
-
-  } catch(error) {
-    console.log('Erro: ', {error: error});
-
+  } catch (error) {
+    console.log('Erro: ', { error: error });
   }
 }
 
 app.get('/', urlEncodedParser, (_, response) => {
   try {
-    response.send({response: 'Foda-se' });
-  } catch(error) {
+    response.send({ response: 'Foda-se' });
+  } catch (error) {
     console.log('Error: ', error);
-    response.send({error: error});
+    response.send({ error: error });
   }
 });
 
 app.get('/users', urlEncodedParser, (_, response) => {
   try {
-    response.send({response: 'Register of users' });
-  } catch(error) {
+    response.send({ response: 'Register of users' });
+  } catch (error) {
     console.log('Error: ', error);
-    response.send({error: error});
+    response.send({ error: error });
   }
 });
 
@@ -68,17 +67,20 @@ app.post('/users/add', urlEncodedParser, (request, response) => {
     let objJSON = {};
 
     objJSON.code = request.body.code ? Number(request.body.code) : getCode();
-    objJSON.name = request.body.name ? request.body.name.toString().trim() : 'Anonymous';
+    objJSON.name = request.body.name
+      ? request.body.name.toString().trim()
+      : 'Anonymous';
     objJSON.age = request.body.age ? Number(request.body.age) : 00;
-    objJSON.email = request.body.email ? request.body.email.toString().trim() : '';
+    objJSON.email = request.body.email
+      ? request.body.email.toString().trim()
+      : '';
 
     addUser(objJSON, (result) => {
-      response.send({result});
+      response.send({ result });
     });
-
-  } catch(error) {
+  } catch (error) {
     console.log('Error: ', error);
-    response.send({error: error});
+    response.send({ error: error });
   }
 });
 
@@ -86,18 +88,17 @@ app.get('/users/find', urlEncodedParser, (request, response) => {
   try {
     let objJSON = {};
 
-    if(request.query.code) objJSON.code = request.query.code.toString();
-    if(request.query.name) objJSON.name = request.query.name;
-    if(request.query.age) objJSON.age = Number(request.query.age);
-    if(request.query.email) objJSON.email = request.query.email;
+    if (request.query.code) objJSON.code = request.query.code.toString();
+    if (request.query.name) objJSON.name = request.query.name;
+    if (request.query.age) objJSON.age = Number(request.query.age);
+    if (request.query.email) objJSON.email = request.query.email;
 
     getUser(objJSON, (result) => {
       response.send(result);
     });
-
-  } catch(error) {
+  } catch (error) {
     console.log('Error: ', error);
-    response.send({error: error})
+    response.send({ error: error });
   }
 });
 
@@ -106,18 +107,33 @@ app.put('/users/:code/edit', urlEncodedParser, (request, response) => {
     let code = request.params.code ? request.params.code : 0;
     let objJSON = {};
 
-    if(request.body.code) objJSON.code = Number(request.body.code);
-    if(request.body.name) objJSON.name = request.body.name;
-    if(request.body.age) objJSON.age = Number(request.body.age);
-    if(request.body.email) objJSON.email = request.body.email;
+    if (request.body.code) objJSON.code = Number(request.body.code);
+    if (request.body.name) objJSON.name = request.body.name;
+    if (request.body.age) objJSON.age = Number(request.body.age);
+    if (request.body.email) objJSON.email = request.body.email;
 
     editUser(objJSON, code, (result) => {
       response.send(result);
     });
-
-  } catch(error) {
+  } catch (error) {
     console.log('Error: ', error);
-    response.send({error: error});
+    response.send({ error: error });
+  }
+});
+
+app.delete('/users/remove/:code', urlEncodedParser, (request, response) => {
+  try {
+    let code = request.params.code ? request.params.code : 0;
+    let objJSON = {
+      code: code,
+    };
+
+    removeUser(objJSON, (result) => {
+      response.send(result);
+    });
+  } catch (error) {
+    console.log('Error: ', error);
+    response.send({ error: error });
   }
 });
 
@@ -127,8 +143,7 @@ function addUser(objJSON, callback) {
     collection.insertOne(objJSON, (error, result) => {
       error ? callback(error) : callback(result);
     });
-
-  } catch(error) {
+  } catch (error) {
     console.log('Error: ', error);
   }
 }
@@ -139,7 +154,7 @@ function getUser(objJSON, callback) {
     collection.find(objJSON).toArray((error, result) => {
       error ? callback(error) : callback(result);
     });
-  } catch(error) {
+  } catch (error) {
     console.log('Error: ', error);
   }
 }
@@ -147,12 +162,21 @@ function getUser(objJSON, callback) {
 function editUser(objJSON, code, callback) {
   try {
     const collection = db.collection('users');
-    collection.updateOne({code: code}, {$set: objJSON}, (error, result) => {
+    collection.updateOne({ code: code }, { $set: objJSON }, (error, result) => {
       error ? callback(error) : callback(result);
     });
-
-  } catch(error) {
+  } catch (error) {
     console.log('Error: ', error);
   }
 }
 
+function removeUser(objJSON, callback) {
+  try {
+    const collection = db.collection('users');
+    collection.deleteOne(objJSON, (error, result) => {
+      error ? callback(error) : callback(result);
+    });
+  } catch (error) {
+    console.log('Error: ', erro);
+  }
+}
